@@ -1,0 +1,135 @@
+<!doctype html>
+<html>
+ <head>
+  <meta charset="UTF-8">
+  <meta name="design-properties" content="{&quot;RULERS_VISIBLE&quot;:true,&quot;GUIDELINES_VISIBLE&quot;:false,&quot;SNAP_TO_OBJECTS&quot;:true,&quot;SNAP_TO_GRID&quot;:true,&quot;SNAPPING_DISTANCE&quot;:9,&quot;JAVA_SOURCES_ROOT&quot;:&quot;src/main/java&quot;,&quot;THEME&quot;:&quot;valo&quot;}">
+  <meta name="vaadin-version" content="8.0.5">
+  <meta name="package-mapping" content="com_vaadin_demo_dashboard_charts:com.vaadin.demo.dashboard.charts">
+  <meta name="package-mapping" content="com_vaadin_addon_charts:com.vaadin.addon.charts">
+  <meta name="package-mapping" content="com_vaadin_addon_charts_examples_other:com.vaadin.addon.charts.examples.other">
+  <meta name="package-mapping" content="ua_moyo_rabbitmq_charts:ua.moyo.rabbitmq.charts">
+ </head>
+ <body>
+  <vaadin-vertical-layout responsive size-full>
+   <vaadin-vertical-layout margin="false">
+    <vaadin-horizontal-layout visible="false" width-full _id="buttonsPanel">
+     <vaadin-button plain-text _id="newDB">
+       Новая БД 
+     </vaadin-button>
+     <vaadin-button plain-text _id="editDB">
+       Редактировать БД 
+     </vaadin-button>
+     <vaadin-button visible="false" plain-text _id="connectDB">
+       Подключиться к БД 
+     </vaadin-button>
+     <vaadin-button visible="false" plain-text _id="deleteMessages">
+       Удалить сообщения 
+     </vaadin-button>
+     <vaadin-button plain-text _id="connectionOnOff">
+       Подключить базы 
+     </vaadin-button>
+    </vaadin-horizontal-layout>
+    <vaadin-horizontal-layout width-full _id="buttonsPanel1">
+     <vaadin-label description="Messages" style-name="success" plain-text _id="mesQuantity" :middle :center>
+       0 
+     </vaadin-label>
+     <vaadin-button icon="fonticon://Vaadin-Icons/e7ae" plain-text _id="showHideMenu"></vaadin-button>
+     <vaadin-button icon="fonticon://Vaadin-Icons/e773" plain-text _id="showHideButtonsPanel"></vaadin-button>
+     <vaadin-button icon="fonticon://Vaadin-Icons/e953" plain-text _id="showHideDB"></vaadin-button>
+     <vaadin-button icon="fonticon://Vaadin-Icons/e943" plain-text _id="logOnOff"></vaadin-button>
+     <vaadin-button icon="fonticon://Vaadin-Icons/e90f" plain-text _id="showCharts" :expand></vaadin-button>
+     <vaadin-button visible="false" icon="fonticon://Vaadin-Icons/e65e" enabled="false" plain-text _id="dbOnOff" :expand></vaadin-button>
+     <vaadin-horizontal-layout visible="false" _id="statistic">
+      <vaadin-label style-name="success" plain-text _id="labelDBSuccess">
+        0 
+      </vaadin-label>
+      <vaadin-label style-name="failure" plain-text _id="labelDBFailed">
+        0 
+      </vaadin-label>
+      <vaadin-label style-name="colored huge" plain-text _id="labelDBPercent" :middle :center>
+        0.0% 
+      </vaadin-label>
+     </vaadin-horizontal-layout>
+    </vaadin-horizontal-layout>
+   </vaadin-vertical-layout>
+   <vaadin-progress-bar visible="false" responsive width-full _id="progressBar"></vaadin-progress-bar>
+   <vaadin-horizontal-layout responsive size-full _id="dBStatistic" :expand>
+    <vaadin-grid responsive size-full data-item-type="ua.moyo.rabbitmq.model.Database" _id="dBList" :expand="2">
+     <table>
+      <colgroup>
+       <col column-id="name" sortable>
+       <col column-id="ip" sortable>
+       <col column-id="base" sortable>
+       <col column-id="rabbitqueue" sortable>
+      </colgroup>
+      <thead>
+       <tr default>
+        <th plain-text column-ids="name">Наименование</th>
+        <th plain-text column-ids="ip">Сервер</th>
+        <th plain-text column-ids="base">База</th>
+        <th plain-text column-ids="rabbitqueue">Очередь</th>
+       </tr>
+      </thead>
+      <tbody></tbody>
+     </table>
+    </vaadin-grid>
+    <vaadin-vertical-layout visible="false" size-full margin="false" _id="cons" :expand>
+     <vaadin-grid visible="false" caption="Connected" style-name="success" size-full data-item-type="ua.moyo.rabbitmq.model.DatabaseTube" _id="dBConnections" :expand="3">
+      <table>
+       <colgroup>
+        <col column-id="database" sortable>
+        <col column-id="connections" sortable>
+       </colgroup>
+       <thead>
+        <tr default>
+         <th plain-text column-ids="database">Database</th>
+         <th plain-text column-ids="connections">Connections</th>
+        </tr>
+       </thead>
+       <tbody></tbody>
+      </table>
+     </vaadin-grid>
+     <vaadin-grid visible="false" caption="Not connected" style-name="failure" size-full data-item-type="ua.moyo.rabbitmq.model.DatabaseTube" _id="dBConnectionsFailed" :expand>
+      <table>
+       <colgroup>
+        <col column-id="database" sortable>
+        <col column-id="connections" sortable>
+       </colgroup>
+       <thead>
+        <tr default>
+         <th plain-text column-ids="database">Database</th>
+         <th plain-text column-ids="connections">Connections</th>
+        </tr>
+       </thead>
+       <tbody></tbody>
+      </table>
+     </vaadin-grid>
+    </vaadin-vertical-layout>
+   </vaadin-horizontal-layout>
+   <vaadin-grid visible="false" size-full data-item-type="ua.moyo.rabbitmq.model.Logger" _id="logger" :expand>
+    <table>
+     <colgroup>
+      <col column-id="date" sortable>
+      <col column-id="location" sortable>
+      <col column-id="description" sortable>
+     </colgroup>
+     <thead>
+      <tr default>
+       <th plain-text column-ids="date">Date</th>
+       <th plain-text column-ids="location">Location</th>
+       <th plain-text column-ids="description">Description</th>
+      </tr>
+     </thead>
+     <tbody></tbody>
+    </table>
+   </vaadin-grid>
+   <vaadin-panel size-full _id="charts" :expand>
+    <vaadin-horizontal-layout spacing="false" responsive size-full _id="vl_charts">
+     <ua_moyo_rabbitmq_charts-receive-send-statistic size-full _id="statisticChart" :middle :center :expand="3"></ua_moyo_rabbitmq_charts-receive-send-statistic>
+     <ua_moyo_rabbitmq_charts-delivery-message-time size-full _id="deliveryMessageTime" :middle :center :expand="3"></ua_moyo_rabbitmq_charts-delivery-message-time>
+     <ua_moyo_rabbitmq_charts-send-statistic-speed size-full _id="sendStatisticSpeed" :expand="2"></ua_moyo_rabbitmq_charts-send-statistic-speed>
+    </vaadin-horizontal-layout>
+   </vaadin-panel>
+  </vaadin-vertical-layout>
+ </body>
+</html>

@@ -236,7 +236,7 @@ public class MoYo {
     }
 
     public static Integer getMoyoQueues() {
-        return moyoQueues;
+        return getMoYoService().getTotalDatabaseConnectionForConnect();
     }
 
     public static void setMoyoQueues(Integer moyoQueues) {

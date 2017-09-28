@@ -62,7 +62,8 @@ public class MoYo {
     public static volatile LinkedHashMap<LocalDateTime, Integer> sendStatisticSpeed = new LinkedHashMap<>();
 
     public static StandardMetricsCollector metrics;
-
+    public static final long connectionTimeoutSec = 30;
+    public static final long sendMessageTimeoutSec = 30;
 
     @Value("${moyo.shop.username}")
     private String shopUsernameNS;
@@ -242,5 +243,7 @@ public class MoYo {
     public static void setMoyoQueues(Integer moyoQueues) {
         MoYo.moyoQueues = moyoQueues;
     }
+
+
 
 }

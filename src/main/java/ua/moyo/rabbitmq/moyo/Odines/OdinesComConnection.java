@@ -42,13 +42,7 @@ public class OdinesComConnection extends DispatchPtr {
 
             System.out.println("host: "+settings.host+", db: "+settings.database+" connected "+new Date());
 
-            if(MoYo.databaseTubes.containsKey(database)){
-                DatabaseTube databaseTube = MoYo.databaseTubes.get(database);
-                databaseTube.setConnections(databaseTube.getConnections() +1);
-            }
-            else{
-                MoYo.databaseTubes.put(database, new DatabaseTube(database,1));
-            }
+
 
 
         }
@@ -58,13 +52,7 @@ public class OdinesComConnection extends DispatchPtr {
             MoYo.logInfo("OdinesComConnection->constuctor->COMException", ex.getMessage());
 
 
-            if(MoYo.databaseTubesFail.containsKey(database)){
-                DatabaseTube databaseTube = MoYo.databaseTubesFail.get(database);
-                databaseTube.setConnections(databaseTube.getConnections() +1);
-            }
-            else{
-                MoYo.databaseTubesFail.put(database, new DatabaseTube(database,1));
-            }
+
 
 
 
@@ -72,9 +60,23 @@ public class OdinesComConnection extends DispatchPtr {
 
         }
 
-    public void close() throws COMException{
-        connection.close();
-        connector.connector.close();
+    public void close() {
+        try {
+            connection.close();
+            connector.connector.close();
+        }
+        catch (COMException ex){
+            try {
+                System.out.println(new String(ex.getMessage().getBytes("ISO-8859-1"),"windows-1251"));
+                MoYo.logInfo("OdinesComConnection->sendMessage->COMException", ex.getMessage());
+            }
+            catch (UnsupportedEncodingException eex){
+                System.out.println(eex.getMessage());
+                MoYo.logInfo("MoyoSenderMessage->run->UnsupportedEncodingException", eex.getMessage());
+            }
+
+        }
+
     }
 
     public boolean sendMessage(String message) throws UnsupportedEncodingException {

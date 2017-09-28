@@ -206,12 +206,7 @@ public class MoYoServiceImpl implements MoYoService {
                 //sometimes we cant close connection or it has been closed,
                 // but we need to reconnect to db, first delete from hashmaps
                 MoYo.databaseTubes.remove(connection.getSettings().getDatabase1C());
-                try {
-                    connection.close();
-                } catch (COMException e) {
-                    e.printStackTrace();
-                    MoYo.logInfo("MoYoService->close1CConnections-COMException", e.getMessage());
-                }
+                connection.close();
                 MoYo.OdiesComConnectionPool.remove(connection);
             }
         });

@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import static ua.moyo.rabbitmq.moyo.rabbitmq.MoYo.sendMessageTimeoutSec;
 
 /**
  * Created by JLD on 28.07.2017.
@@ -44,8 +48,21 @@ public class MoyoSenderMessage implements Runnable {
         Boolean delivered = false;
 
         try {
-            delivered = shopConnection.sendMessage(message);
+
             Long messageTag = envelope.getDeliveryTag();
+
+            try {
+                Future<Boolean> future = MoYo.executor.submit(() -> (Boolean) shopConnection.sendMessage(message));
+                delivered = future.get(sendMessageTimeoutSec, TimeUnit.SECONDS).booleanValue();
+            } catch (Exception e) {
+                e.printStackTrace();
+                MoYo.logInfo("MoYoConnection->run->Exception->Future",
+                        "Не удалось отправить сообщнение в базу -"+database.getName()+"- за заданное время");
+                channel.basicNack(messageTag, false, true);
+                MoYo.getMoYoService().disconnectDB(database, false);
+                return;
+            }
+
             if(delivered){
                 if (channel.isOpen()){
                 channel.basicAck(messageTag, false);

@@ -17,5 +17,6 @@ public interface MoYoService {
     void disconnectDB(Database database, boolean inThread);
     void connectAllDB();
     void controlPoolConnections();
-
+    void updateTubesFail(Database database);
+    void updateTubesSuccess(Database database);
 }

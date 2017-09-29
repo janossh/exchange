@@ -7,6 +7,7 @@ import ua.moyo.rabbitmq.moyo.Odines.OdinesComConnector;
 import ua.moyo.rabbitmq.moyo.Odines.OdinesConnectionSettings;
 import com.rabbitmq.client.Channel;
 import org.jawin.COMException;
+import ua.moyo.rabbitmq.moyo.Service.MoYoService;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
@@ -63,7 +64,10 @@ public class MoYoConnection implements Runnable {
                     e.printStackTrace();
                     MoYo.logInfo("MoYoConnection->run->Exception->Future",
                             "Не удалось подключиться к базе -"+database.getName()+"- за заданное время");
-                    alive = false; channelClose(channel); break;
+                    alive = false;
+                    channelClose(channel);
+                    MoYo.getMoYoService().updateTubesFail(database);
+                    break;
                 }
 
             }
@@ -98,19 +102,18 @@ public class MoYoConnection implements Runnable {
         OdinesComConnection shopConnection = new OdinesComConnection(odinesComConnector, shop, true);
 
         if (!alive){
-            updateTubesFail();
             MoYo.executor.submit(() -> shopConnection.close());
             return;
         }
 
         String dbConnection = db+"_"+i;
         if (shopConnection.isConnected()) {
-            updateTubesSuccess();
+            MoYo.getMoYoService().updateTubesSuccess(database);
             MoYo.OdiesComConnectionPool.put(dbConnection, shopConnection);
             MoYo.executor.execute(new MoYoConsumer(dbConnection, channel));
         }
         else {
-            updateTubesFail();
+            MoYo.getMoYoService().updateTubesFail(database);
             if(channel.isOpen()){
                 MoYo.channels.remove(database);
                 channelClose(channel);
@@ -118,25 +121,7 @@ public class MoYoConnection implements Runnable {
         }
     }
 
-    private void updateTubesFail() {
-        if(MoYo.databaseTubesFail.containsKey(database)){
-            DatabaseTube databaseTube = MoYo.databaseTubesFail.get(database);
-            databaseTube.setConnections(databaseTube.getConnections() +1);
-        }
-        else{
-            MoYo.databaseTubesFail.put(database, new DatabaseTube(database,1));
-        }
-    }
 
-    private void updateTubesSuccess() {
-        if(MoYo.databaseTubes.containsKey(database)){
-            DatabaseTube databaseTube = MoYo.databaseTubes.get(database);
-            databaseTube.setConnections(databaseTube.getConnections() +1);
-        }
-        else{
-            MoYo.databaseTubes.put(database, new DatabaseTube(database,1));
-        }
-    }
 
 
 }

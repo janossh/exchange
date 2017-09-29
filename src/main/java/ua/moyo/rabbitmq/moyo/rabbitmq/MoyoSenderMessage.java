@@ -60,6 +60,7 @@ public class MoyoSenderMessage implements Runnable {
                         "Не удалось отправить сообщнение в базу -"+database.getName()+"- за заданное время");
                 channel.basicNack(messageTag, false, true);
                 MoYo.getMoYoService().disconnectDB(database, false);
+                MoYo.getMoYoService().updateTubesFail(database);
                 return;
             }
 

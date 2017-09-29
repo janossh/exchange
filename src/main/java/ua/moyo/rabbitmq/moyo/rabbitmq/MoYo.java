@@ -63,7 +63,7 @@ public class MoYo {
 
     public static StandardMetricsCollector metrics;
     public static final long connectionTimeoutSec = 30;
-    public static final long sendMessageTimeoutSec = 30;
+    public static final long sendMessageTimeoutSec = 90;
 
     @Value("${moyo.shop.username}")
     private String shopUsernameNS;

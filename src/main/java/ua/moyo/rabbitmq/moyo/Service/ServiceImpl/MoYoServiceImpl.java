@@ -321,4 +321,27 @@ public class MoYoServiceImpl implements MoYoService {
 
         log(controlPoolConnections,"...end", false);
     }
+
+    @Override
+    public void updateTubesFail(Database database) {
+        if(MoYo.databaseTubesFail.containsKey(database)){
+            DatabaseTube databaseTube = MoYo.databaseTubesFail.get(database);
+            databaseTube.setConnections(databaseTube.getConnections() +1);
+        }
+        else{
+            MoYo.databaseTubesFail.put(database, new DatabaseTube(database,1));
+        }
+    }
+
+    @Override
+    public void updateTubesSuccess(Database database) {
+        if(MoYo.databaseTubes.containsKey(database)){
+            DatabaseTube databaseTube = MoYo.databaseTubes.get(database);
+            databaseTube.setConnections(databaseTube.getConnections() +1);
+        }
+        else{
+            MoYo.databaseTubes.put(database, new DatabaseTube(database,1));
+        }
+    }
+
 }

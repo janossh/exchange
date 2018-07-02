@@ -50,20 +50,6 @@ public class DashboardUI extends UI {
 
     private final DashboardEventBus dashboardEventbus = new DashboardEventBus();
 
-    /*
-    @Autowired
-    GoodService goodService;
-    @Autowired
-    StoreRepository storeRepository;
-    @Autowired
-    GoodRepository goodRepository;
-    @Autowired
-    PriceForChangeRepository priceForChangeRepository;
-    @Autowired
-    NewPriceChangeForm newPriceChangeForm;
-    */
-
-
     @Autowired
     UserService userService;
     @Autowired
@@ -92,14 +78,13 @@ public class DashboardUI extends UI {
     public DashboardUI(){
 
 
-
     }
 
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
 
-
+        moYoService.logClean();
 
         setLocale(Locale.US);
         DashboardEventBus.register(this);
@@ -133,112 +118,28 @@ public class DashboardUI extends UI {
         super.detach();
     }
 
-    /*
-
-    public  NewPriceChangeForm getNewPriceChangeForm() {
-        return newPriceChangeForm;
-    }
-
-    public  void setNewPriceChangeForm(NewPriceChangeForm newPriceChangeForm) {
-        this.newPriceChangeForm = newPriceChangeForm;
-    }
-
-    public  PriceForChangeRepository getPriceForChangeRepository() {
-        return priceForChangeRepository;
-    }
-
-    public  void setPriceForChangeRepository(PriceForChangeRepository priceForChangeRepository) {
-        this.priceForChangeRepository = priceForChangeRepository;
-    }
-    */
 
     public DatabaseForm getDatabaseForm() {
         return databaseForm;
-    }
-
-    public void setDatabaseForm(DatabaseForm databaseForm) {
-        this.databaseForm = databaseForm;
     }
 
     public DatabaseRepository getDatabaseRepository() {
         return databaseRepository;
     }
 
-    public void setDatabaseRepository(DatabaseRepository databaseRepository) {
-        this.databaseRepository = databaseRepository;
-    }
-
-    public  UserRepository getUserRepository() {
-        return userRepository;
-    }
-
-    public  void setUserRepository(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-
-
-    public UserService getUserService() {
-        return userService;
-    }
-
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
-
     public MoYo getMoYo() {
         return moYo;
-    }
-
-    public void setMoYo(MoYo moYo) {
-        this.moYo = moYo;
     }
 
     public MoYoService getMoYoService() {
         return moYoService;
     }
 
-    public void setMoYoService(MoYoService moYoService) {
-        this.moYoService = moYoService;
-    }
-
     public LogRepository getLogRepository() {
         return logRepository;
     }
 
-    public void setLogRepository(LogRepository logRepository) {
-        this.logRepository = logRepository;
-    }
-
-/*
-        public GoodService getGoodService() {
-            return goodService;
-        }
-
-        public  void setGoodService(GoodService goodService) {
-            this.goodService = goodService;
-        }
-
-        public StoreRepository getStoreRepository() {
-            return storeRepository;
-        }
-
-        public void setStoreRepository(StoreRepository storeRepository) {
-            this.storeRepository = storeRepository;
-        }
-
-        public GoodRepository getGoodRepository() {
-            return goodRepository;
-        }
-
-        public  void setGoodRepository(GoodRepository goodRepository) {
-            this.goodRepository = goodRepository;
-        }
-
-*/
-
-
-    private void updateContent() {
+      private void updateContent() {
         UserDashboard user = (UserDashboard) VaadinSession.getCurrent().getAttribute(
                 UserDashboard.class.getName());
         //if (user != null && "admin".equals(user.getRole())) {

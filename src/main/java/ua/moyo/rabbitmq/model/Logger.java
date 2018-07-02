@@ -37,7 +37,7 @@ public class Logger implements Serializable {
         this.description = description;
         this.priority = priority;
         this.date = LocalDateTime.now();
-        this.setShowen(false);
+        this.setShowen(true);
     }
 
     public Long getId() {

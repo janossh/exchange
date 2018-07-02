@@ -3,6 +3,7 @@ package ua.moyo.rabbitmq.moyo.rabbitmq;
 import com.rabbitmq.client.impl.StandardMetricsCollector;
 import ua.moyo.rabbitmq.model.Database;
 import ua.moyo.rabbitmq.model.DatabaseTube;
+import ua.moyo.rabbitmq.model.DatabaseUnhandledPackages;
 import ua.moyo.rabbitmq.repository.DatabaseRepository;
 import ua.moyo.rabbitmq.repository.LogRepository;
 import ua.moyo.rabbitmq.moyo.Enums.LogPriority;
@@ -56,14 +57,17 @@ public class MoYo {
     public static volatile HashMap<Database, DatabaseTube> databaseTubes = new HashMap<>();
     public static volatile HashMap<Database, DatabaseTube> databaseTubesFail = new HashMap<>();
     public static volatile HashMap<Database, Channel> channels = new HashMap<>();
-    public static volatile HashMap<LocalDateTime, Integer> receiveStatistic = new HashMap<>();
-    public static volatile LinkedHashMap<LocalDateTime, Integer> sendStatistic = new LinkedHashMap<>();
-    public static volatile LinkedHashMap<LocalDateTime, LocalDateTime> sendStatisticTime = new LinkedHashMap<>();
-    public static volatile LinkedHashMap<LocalDateTime, Integer> sendStatisticSpeed = new LinkedHashMap<>();
+    public static volatile List<DatabaseUnhandledPackages> numberUnhandledPackages = new ArrayList<>();
+
+    public static long mesIN = 0;
+    public static long mesOUT = 0;
+
 
     public static StandardMetricsCollector metrics;
-    public static final long connectionTimeoutSec = 30;
-    public static final long sendMessageTimeoutSec = 90;
+    public static final long connectionTimeoutSec = 90;
+    public static final long sendMessageTimeoutSec = 120;
+
+    public static final Integer NumberUnhandledPackagesDefault = 999;
 
     @Value("${moyo.shop.username}")
     private String shopUsernameNS;
@@ -88,34 +92,20 @@ public class MoYo {
 
     }
 
-    public static synchronized void receiveStatisticPlus(LocalDateTime localDateTime, Integer q){
-        Integer plus;
-        Integer rq = receiveStatistic.get(localDateTime);
-        if (rq==null){
-            plus = q;
-        }
-        else {plus = rq + q;}
-        receiveStatistic.put(localDateTime, plus);
+    public static synchronized void plusIn(){
+        mesIN++;
     }
 
-    public static synchronized HashMap<LocalDateTime, Integer> getReceiveStatistic(){
-        return receiveStatistic;
+    public static synchronized void plusOut(){
+        mesOUT++;
     }
 
-    public static synchronized void sendStatisticTimePlus(LocalDateTime startTime, LocalDateTime endTime){
-        sendStatisticTime.put(startTime, endTime);
+    public static synchronized void profileIn(Database database){
+        if (database.getRabbitqueue().equals("online")){plusIn();}
     }
 
-    public static synchronized void sendStatisticPlus(LocalDateTime localDateTime){
-        Integer q = sendStatistic.get(localDateTime);
-        sendStatistic.put(localDateTime, q==null ? 1 : ++q);
-    }
-
-    public static synchronized void sendStatisticSpeedPlus(LocalDateTime localDateTime){
-        Integer q = sendStatisticSpeed.get(localDateTime);
-        q = q==null ? 1 : ++q;
-        sendStatisticSpeed.put(localDateTime, q);
-
+    public static synchronized void profileOut(Database database){
+        if (database.getRabbitqueue().equals("online")){plusOut();}
     }
 
     private void initConnectionFactory(){
@@ -162,13 +152,10 @@ public class MoYo {
         return databaseTubesFail;
     }
 
-    public static void setDatabaseTubesFail(HashMap<Database, DatabaseTube> databaseTubesFail) {
-        MoYo.databaseTubesFail = databaseTubesFail;
+    public static synchronized List<DatabaseUnhandledPackages> getNumberUnhandledPackages() {
+        return numberUnhandledPackages;
     }
 
-    public static void setDatabaseTubes(HashMap<Database, DatabaseTube> databaseTubes) {
-        MoYo.databaseTubes = databaseTubes;
-    }
 
     public static void showNotification(String messageText){
 
@@ -187,7 +174,6 @@ public class MoYo {
 
     public static void log(String where, String description, LogPriority priority){
         moYoService.log(where, description, priority);
-        showNotification(description);
     }
 
     public static String split(String s, int length) {
@@ -220,10 +206,6 @@ public class MoYo {
         return moYoService;
     }
 
-    public static void setMoYoService(MoYoService moYoService) {
-        MoYo.moYoService = moYoService;
-    }
-
     public static String getShopUsername() {
         return shopUsername;
     }
@@ -239,11 +221,6 @@ public class MoYo {
     public static Integer getMoyoQueues() {
         return getMoYoService().getTotalDatabaseConnectionForConnect();
     }
-
-    public static void setMoyoQueues(Integer moyoQueues) {
-        MoYo.moyoQueues = moyoQueues;
-    }
-
 
 
 }

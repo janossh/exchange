@@ -1,8 +1,6 @@
 package ua.moyo.rabbitmq.model;
 
-/**
- * Created by JLD on 31.05.2017.
- */
+
 public class LoginRegistrationInfo {
 
     String email;

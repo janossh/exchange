@@ -4,15 +4,10 @@ import com.google.common.eventbus.Subscribe;
 import com.vaadin.addon.charts.themes.ValoLightTheme;
 import com.vaadin.annotations.Title;
 import ua.moyo.rabbitmq.DashboardUI;
-import ua.moyo.rabbitmq.model.Database;
-import ua.moyo.rabbitmq.model.DatabaseTube;
-import ua.moyo.rabbitmq.model.Logger;
-import ua.moyo.rabbitmq.charts.SendStatisticSpeed;
+import ua.moyo.rabbitmq.model.*;
 import ua.moyo.rabbitmq.moyo.Enums.UsersRole;
 import ua.moyo.rabbitmq.moyo.Service.MoYoService;
 import ua.moyo.rabbitmq.repository.DatabaseRepository;
-import ua.moyo.rabbitmq.charts.DeliveryMessageTime;
-import ua.moyo.rabbitmq.charts.ReceiveSendStatistic;
 import ua.moyo.rabbitmq.event.DashboardEvent;
 import ua.moyo.rabbitmq.event.DashboardEventBus;
 import ua.moyo.rabbitmq.moyo.Events.CustomPoolEvent;
@@ -33,7 +28,6 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import ua.moyo.rabbitmq.model.User;
 
 
 import javax.annotation.PostConstruct;
@@ -62,11 +56,9 @@ public class MoYoHomeView extends VerticalLayout implements View  {
     Grid<Database> dBList;
     Grid<Logger> logs;
     Grid<DatabaseTube> dBConnections, dBConnectionsFailed;
-    Button connectionOnOff, deleteMessages, connectDB, newDB, showCharts;
+    Grid<DatabaseUnhandledPackages> databaseUnhandledPackages;
+    Button connectionOnOff, deleteMessages, connectDB, newDB;
     Label labelDBSuccess, labelDBFailed, labelDBPercent;
-    ReceiveSendStatistic statisticChart;
-    DeliveryMessageTime deliveryMessageTime;
-    SendStatisticSpeed sendStatisticSpeed;
     Panel charts;
 
     public MoYoHomeView() {
@@ -84,11 +76,9 @@ public class MoYoHomeView extends VerticalLayout implements View  {
         logs = home.logger;
         connectDB = home.connectDB;
         newDB = home.newDB;
-        statisticChart = home.statisticChart;
-        charts = home.charts;
-        showCharts = home.showCharts;
-        deliveryMessageTime = home.deliveryMessageTime;
-        sendStatisticSpeed = home.sendStatisticSpeed;
+        databaseUnhandledPackages = home.unhandledPackages;
+
+
 
     }
 
@@ -113,14 +103,14 @@ public class MoYoHomeView extends VerticalLayout implements View  {
             home.showHideDB.addClickListener(clickEvent -> home.dBStatistic.setVisible(!home.dBStatistic.isVisible()));
             home.showHideMenu.addClickListener(clickEvent -> DashboardEventBus.post(new DashboardEvent.ShowHideMenu()));
             home.logOnOff.addClickListener(clickEvent -> logs.setVisible(!logs.isVisible()));
-            showCharts.addClickListener(clickEvent -> charts.setVisible(!charts.isVisible()));
             home.showHideButtonsPanel.addClickListener(clickEvent -> home.buttonsPanel.setVisible(!home.buttonsPanel.isVisible()));
 
             dBConnections.setItems(ui.getMoYo().getDatabaseTube());
             dBConnectionsFailed.setItems(ui.getMoYo().getDatabaseTubeFailed());
+            databaseUnhandledPackages.setItems(ui.getMoYo().getNumberUnhandledPackages());
 
             initShedulerUpdateDBConnections();
-            initShedulerShowLogMessages();
+            //initShedulerShowLogMessages();
             initShedulerUpdateLogView();
 
             initButtonSetActiveDBReverse();
@@ -143,6 +133,7 @@ public class MoYoHomeView extends VerticalLayout implements View  {
         updateDatabases();
         updateConnectionOnOff();
         updateMesQuantity();
+        updateInOut();
 
         setSizeFull();
         setMargin(false);
@@ -280,6 +271,15 @@ public class MoYoHomeView extends VerticalLayout implements View  {
         home.mesQuantity.setValue(String.valueOf(MoYo.mesQuantity));
     }
 
+    private void updateInOut(){
+        home.mesIN.setValue(String.valueOf(MoYo.mesIN));
+        home.mesOUT.setValue(String.valueOf(MoYo.mesOUT));
+    }
+
+    private void updateNumberUnhandledPackages(){
+        databaseUnhandledPackages.setItems(ui.getMoYo().getNumberUnhandledPackages());
+    }
+
     private void updateTitlesConnectDB(Database db, Boolean isConnected) {
 
         if(db==null){return;}
@@ -289,11 +289,11 @@ public class MoYoHomeView extends VerticalLayout implements View  {
         }
 
         if (isConnected){
-            connectDB.setCaption("Îòêëþ÷èòü áàçó");
+            connectDB.setCaption("ÐžÑ‚ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ Ð±Ð°Ð·Ñƒ");
             connectDB.setStyleName(ValoTheme.BUTTON_DANGER);
         }
         else{
-            connectDB.setCaption("Ïîäêëþ÷èòü áàçó");
+            connectDB.setCaption("ÐŸÐ¾Ð´ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ Ð±Ð°Ð·Ñƒ");
             connectDB.setStyleName(ValoTheme.BUTTON_FRIENDLY);
         }
 
@@ -315,7 +315,7 @@ public class MoYoHomeView extends VerticalLayout implements View  {
             ui.access(() -> {
 
                 List<Logger> loggers = new ArrayList<>();
-                ui.getLogRepository().findAll().stream().sorted(Comparator.comparing(Logger::getDate).reversed()).limit(30).forEach(logger -> {
+                ui.getLogRepository().findAll().stream().sorted(Comparator.comparing(Logger::getDate).reversed()).limit(50).forEach(logger -> {
 
                     loggers.add(logger);
 
@@ -363,13 +363,13 @@ public class MoYoHomeView extends VerticalLayout implements View  {
     private void updateConnectionOnOff(){
         if(isBaseConnected){
 
-            connectionOnOff.setCaption("Îòêëþ÷èòü áàçû");
+            connectionOnOff.setCaption("ÐžÑ‚ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ Ð±Ð°Ð·Ñ‹");
             connectionOnOff.setStyleName(ValoTheme.BUTTON_DANGER);
             connectionOnOff.setIcon(VaadinIcons.FLIGHT_LANDING);
         }
         else {
 
-            connectionOnOff.setCaption("Ïîäêëþ÷èòü áàçû");
+            connectionOnOff.setCaption("ÐŸÐ¾Ð´ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ Ð±Ð°Ð·Ñ‹");
             connectionOnOff.setStyleName(ValoTheme.BUTTON_FRIENDLY);
             connectionOnOff.setIcon(VaadinIcons.FLIGHT_TAKEOFF);
         }
@@ -474,9 +474,11 @@ public class MoYoHomeView extends VerticalLayout implements View  {
     @Subscribe
     public void updateWithPool(final CustomPoolEvent customPoolEvent){
         initShedulerUpdateDBConnections();
-        initShedulerShowLogMessages();
+//        initShedulerShowLogMessages();
         initShedulerUpdateLogView();
         updateMesQuantity();
+        updateInOut();
+        updateNumberUnhandledPackages();
 
     }
 

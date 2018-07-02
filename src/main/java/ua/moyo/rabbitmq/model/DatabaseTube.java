@@ -1,8 +1,6 @@
 package ua.moyo.rabbitmq.model;
 
-/**
- * Created by JLD on 02.08.2017.
- */
+
 public class DatabaseTube {
 
     Database database;

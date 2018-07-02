@@ -13,9 +13,9 @@ public class Database implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Заполните имя базы данных")
+    @NotNull(message = "Р—Р°РїРѕР»РЅРёС‚Рµ РёРјСЏ Р±Р°Р·С‹ РґР°РЅРЅС‹С…")
     private String name;
-    @NotNull(message = "Заполните ip адрес базы данных")
+    @NotNull(message = "Р—Р°РїРѕР»РЅРёС‚Рµ ip Р°РґСЂРµСЃ Р±Р°Р·С‹ РґР°РЅРЅС‹С…")
     private String ip;
     private String comment;
     @Column(name = "active")
@@ -155,17 +155,15 @@ public class Database implements Serializable {
 
         Database database = (Database) o;
 
-        if (ip != null ? !ip.equals(database.ip) : database.ip != null) return false;
-        return base != null ? base.equals(database.base) : database.base == null;
-
+        if (!ip.equals(database.ip)) return false;
+        return name.equals(database.name);
     }
 
     @Override
     public int hashCode() {
-        int result = ip != null ? ip.hashCode() : 0;
-        result = 31 * result + (base != null ? base.hashCode() : 0);
+
+        int result = ip.hashCode();
+        result = 31 * result + name.hashCode();
         return result;
     }
-
-
 }

@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
 
 import java.io.Serializable;
-
-/**
- * Created by JLD on 30.08.2017.
- */@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "source",
         "vhost",

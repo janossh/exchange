@@ -19,4 +19,5 @@ public interface MoYoService {
     void controlPoolConnections();
     void updateTubesFail(Database database);
     void updateTubesSuccess(Database database);
+    void updateNumberUnhandledPackages();
 }

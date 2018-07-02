@@ -2,7 +2,7 @@
 <html>
  <head>
   <meta charset="UTF-8">
-  <meta name="design-properties" content="{&quot;RULERS_VISIBLE&quot;:true,&quot;GUIDELINES_VISIBLE&quot;:false,&quot;SNAP_TO_OBJECTS&quot;:true,&quot;SNAP_TO_GRID&quot;:true,&quot;SNAPPING_DISTANCE&quot;:9,&quot;JAVA_SOURCES_ROOT&quot;:&quot;src/main/java&quot;,&quot;THEME&quot;:&quot;valo&quot;}">
+  <meta name="design-properties" content="{&quot;RULERS_VISIBLE&quot;:true,&quot;GUIDELINES_VISIBLE&quot;:false,&quot;SNAP_TO_OBJECTS&quot;:true,&quot;SNAP_TO_GRID&quot;:true,&quot;SNAPPING_DISTANCE&quot;:9,&quot;GENERATE_GETTERS&quot;:false,&quot;JAVA_SOURCES_ROOT&quot;:&quot;src/main/java&quot;,&quot;THEME&quot;:&quot;valo&quot;}">
   <meta name="vaadin-version" content="8.0.5">
   <meta name="package-mapping" content="com_vaadin_demo_dashboard_charts:com.vaadin.demo.dashboard.charts">
   <meta name="package-mapping" content="com_vaadin_addon_charts:com.vaadin.addon.charts">
@@ -30,14 +30,19 @@
      </vaadin-button>
     </vaadin-horizontal-layout>
     <vaadin-horizontal-layout width-full _id="buttonsPanel1">
-     <vaadin-label description="Messages" style-name="success" plain-text _id="mesQuantity" :middle :center>
+     <vaadin-label icon="fonticon://Vaadin-Icons/e71b" description="Messages" style-name="success" plain-text _id="mesIN">
+       0 
+     </vaadin-label>
+     <vaadin-label icon="fonticon://Vaadin-Icons/e660" description="Messages" style-name="success" plain-text _id="mesOUT">
        0 
      </vaadin-label>
      <vaadin-button icon="fonticon://Vaadin-Icons/e7ae" plain-text _id="showHideMenu"></vaadin-button>
+     <vaadin-label description="Messages" style-name="success" plain-text _id="mesQuantity" :middle :center>
+       0 
+     </vaadin-label>
      <vaadin-button icon="fonticon://Vaadin-Icons/e773" plain-text _id="showHideButtonsPanel"></vaadin-button>
      <vaadin-button icon="fonticon://Vaadin-Icons/e953" plain-text _id="showHideDB"></vaadin-button>
-     <vaadin-button icon="fonticon://Vaadin-Icons/e943" plain-text _id="logOnOff"></vaadin-button>
-     <vaadin-button icon="fonticon://Vaadin-Icons/e90f" plain-text _id="showCharts" :expand></vaadin-button>
+     <vaadin-button icon="fonticon://Vaadin-Icons/e943" plain-text _id="logOnOff" :expand></vaadin-button>
      <vaadin-button visible="false" icon="fonticon://Vaadin-Icons/e65e" enabled="false" plain-text _id="dbOnOff" :expand></vaadin-button>
      <vaadin-horizontal-layout visible="false" _id="statistic">
       <vaadin-label style-name="success" plain-text _id="labelDBSuccess">
@@ -105,6 +110,23 @@
       </table>
      </vaadin-grid>
     </vaadin-vertical-layout>
+    <vaadin-vertical-layout size-full margin="false" _id="unhandledPackagesLayout" :expand>
+     <vaadin-grid caption="Number of unhandled packages" style-name="success" size-full data-item-type="ua.moyo.rabbitmq.model.DatabaseUnhandledPackages" _id="unhandledPackages" :expand="3">
+      <table>
+       <colgroup>
+        <col column-id="database" sortable>
+        <col column-id="numberUnhandledMessages" sortable>
+       </colgroup>
+       <thead>
+        <tr default>
+         <th plain-text column-ids="database">Database</th>
+         <th plain-text column-ids="numberUnhandledMessages">Number</th>
+        </tr>
+       </thead>
+       <tbody></tbody>
+      </table>
+     </vaadin-grid>
+    </vaadin-vertical-layout>
    </vaadin-horizontal-layout>
    <vaadin-grid visible="false" size-full data-item-type="ua.moyo.rabbitmq.model.Logger" _id="logger" :expand>
     <table>
@@ -123,13 +145,6 @@
      <tbody></tbody>
     </table>
    </vaadin-grid>
-   <vaadin-panel size-full _id="charts" :expand>
-    <vaadin-horizontal-layout spacing="false" responsive size-full _id="vl_charts">
-     <ua_moyo_rabbitmq_charts-receive-send-statistic size-full _id="statisticChart" :middle :center :expand="3"></ua_moyo_rabbitmq_charts-receive-send-statistic>
-     <ua_moyo_rabbitmq_charts-delivery-message-time size-full _id="deliveryMessageTime" :middle :center :expand="3"></ua_moyo_rabbitmq_charts-delivery-message-time>
-     <ua_moyo_rabbitmq_charts-send-statistic-speed size-full _id="sendStatisticSpeed" :expand="2"></ua_moyo_rabbitmq_charts-send-statistic-speed>
-    </vaadin-horizontal-layout>
-   </vaadin-panel>
   </vaadin-vertical-layout>
  </body>
 </html>

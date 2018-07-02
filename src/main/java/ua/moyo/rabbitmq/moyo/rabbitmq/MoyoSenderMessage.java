@@ -8,7 +8,6 @@ import com.rabbitmq.client.Envelope;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -42,9 +41,12 @@ public class MoyoSenderMessage implements Runnable {
         sendMessage();
     }
 
-    public void sendMessage(){
+    public void sendMessage() {
 
-        if(channel==null)return; if (!channel.isOpen()){return;}
+        if (channel == null) return;
+        if (!channel.isOpen()) {
+            return;
+        }
         Boolean delivered = false;
 
         try {
@@ -57,49 +59,38 @@ public class MoyoSenderMessage implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
                 MoYo.logInfo("MoYoConnection->run->Exception->Future",
-                        "Íå óäàëîñü îòïðàâèòü ñîîáùíåíèå â áàçó -"+database.getName()+"- çà çàäàííîå âðåìÿ");
+                        "ÐÐµ ÑƒÐ´Ð°Ð»Ð¾ÑÑŒ Ð¾Ñ‚Ð¿Ñ€Ð°Ð²Ð¸Ñ‚ÑŒ ÑÐ¾Ð¾Ð±Ñ‰Ð½ÐµÐ½Ð¸Ðµ Ð² Ð±Ð°Ð·Ñƒ -" + database.getName() + "- Ð·Ð° Ð·Ð°Ð´Ð°Ð½Ð½Ð¾Ðµ Ð²Ñ€ÐµÐ¼Ñ");
                 channel.basicNack(messageTag, false, true);
                 MoYo.getMoYoService().disconnectDB(database, false);
                 MoYo.getMoYoService().updateTubesFail(database);
                 return;
             }
 
-            if(delivered){
-                if (channel.isOpen()){
-                channel.basicAck(messageTag, false);
-                MoYo.sendStatisticPlus(dateIn);
-                LocalDateTime ldt = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-                MoYo.sendStatisticTimePlus(dateIn, ldt);
-                MoYo.sendStatisticSpeedPlus(ldt);
-                }
-                else {
+            if (delivered) {
+                if (channel.isOpen()) {
+                    channel.basicAck(messageTag, false);
+                    MoYo.profileOut(database);
+                } else {
                     delivered = false;
-                    MoYo.logInfo("MoyoSenderMessage->run->delivered&!channel.isOpen()", database.getPresentation()+" couldn't receive message: ");
+                    MoYo.logInfo("MoyoSenderMessage->run->delivered&!channel.isOpen()", database.getPresentation() + " couldn't receive message: ");
                 }
-            }
-            else {
+            } else {
 
-                MoYo.logInfo("MoyoSenderMessage->run->!delivered", database.getPresentation()+" couldn't receive message: ");
+                MoYo.logInfo("MoyoSenderMessage->run->!delivered", database.getPresentation() + " couldn't receive message: ");
                 channel.basicNack(messageTag, false, true);
                 MoYo.getMoYoService().disconnectDB(database, false);
             }
-        }catch (UnsupportedEncodingException ex){
+        } catch (UnsupportedEncodingException ex) {
             System.out.println(ex.getMessage());
             MoYo.logInfo("MoyoSenderMessage->run->UnsupportedEncodingException", ex.getMessage());
-        }catch (IOException ex){
-            System.out.println(ex.getMessage()+ex.toString());
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage() + ex.toString());
             MoYo.logInfo("MoyoSenderMessage->run->IOException", ex.getMessage());
         }
 
-        if (!delivered){ MoYo.getMoYoService().disconnectDB(database, false);}
-    }
-
-    public OdinesComConnection getShopConnection() {
-        return shopConnection;
-    }
-
-    public void setShopConnection(OdinesComConnection shopConnection) {
-        this.shopConnection = shopConnection;
+        if (!delivered) {
+            MoYo.getMoYoService().disconnectDB(database, false);
+        }
     }
 
     public String getMessage() {
@@ -108,14 +99,6 @@ public class MoyoSenderMessage implements Runnable {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public String getDb() {
-        return db;
-    }
-
-    public void setDb(String db) {
-        this.db = db;
     }
 }
 

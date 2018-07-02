@@ -10,6 +10,8 @@ import org.jawin.DispatchPtr;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
+import static ua.moyo.rabbitmq.moyo.rabbitmq.MoYo.NumberUnhandledPackagesDefault;
+
 public class OdinesComConnection extends DispatchPtr {
 
     OdinesComConnector connector;
@@ -121,7 +123,31 @@ public class OdinesComConnection extends DispatchPtr {
             isOnline = false;
         }
 
+
         return isOnline;
+    }
+
+    public Integer getNumberUnhandledPackages() {
+        Integer NumberUnhandledPackages = NumberUnhandledPackagesDefault;
+        try {
+            DispatchPtr gitDisp = (DispatchPtr)connection.createGITRef();
+            obModul = (DispatchPtr)gitDisp.get("RABBIT_MQ");
+            NumberUnhandledPackages =  (Integer)obModul.invoke("hello", "NumberUnhandledPackages");
+            obModul.close();
+            gitDisp.close();
+        }
+        catch (COMException ex){
+            try {
+                MoYo.logInfo("OdinesComConnection->getNumberUnhandledPackages->COMException", new String(ex.getMessage().getBytes("ISO-8859-1"),"windows-1251"));
+            }
+            catch (UnsupportedEncodingException uee){
+                MoYo.logInfo("OdinesComConnection->getNumberUnhandledPackages->UnsupportedEncodingException", uee.getMessage());
+            }
+        }
+        catch (Exception e){
+            MoYo.logInfo("OdinesComConnection->getNumberUnhandledPackages->Exception", e.getMessage());
+        }
+        return NumberUnhandledPackages;
     }
 
     public OdinesConnectionSettings getSettings() {

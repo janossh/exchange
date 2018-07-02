@@ -8,9 +8,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-/**
- * Created by JLD on 28.07.2017.
- */
+
 public class MoYoConsumer implements Runnable {
 
     String base;

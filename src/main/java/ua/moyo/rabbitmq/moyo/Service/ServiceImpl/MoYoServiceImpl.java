@@ -3,8 +3,11 @@ package ua.moyo.rabbitmq.moyo.Service.ServiceImpl;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Transactional;
 import ua.moyo.rabbitmq.model.Database;
 import ua.moyo.rabbitmq.model.DatabaseTube;
+import ua.moyo.rabbitmq.model.DatabaseUnhandledPackages;
 import ua.moyo.rabbitmq.model.Logger;
 import ua.moyo.rabbitmq.repository.DatabaseRepository;
 import ua.moyo.rabbitmq.repository.LogRepository;
@@ -14,25 +17,24 @@ import ua.moyo.rabbitmq.moyo.Service.MoYoService;
 import ua.moyo.rabbitmq.moyo.rabbitmq.MoYo;
 import ua.moyo.rabbitmq.moyo.rabbitmq.MoYoConnection;
 import ua.moyo.rabbitmq.view.MoYoHomeView;
-import net.anotheria.moskito.aop.annotation.Monitor;
+//import net.anotheria.moskito.aop.annotation.Monitor;
 
 import org.jawin.COMException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeoutException;
 
-import static ua.moyo.rabbitmq.moyo.rabbitmq.MoYo.databaseTubesFail;
-import static ua.moyo.rabbitmq.moyo.rabbitmq.MoYo.shopPool;
+import static ua.moyo.rabbitmq.moyo.rabbitmq.MoYo.*;
 
 @Service
-@Monitor(producerId = "service", subsystem = "MoYo", category = "-")
+//@Monitor(producerId = "service", subsystem = "MoYo", category = "-")
 public class MoYoServiceImpl implements MoYoService {
 
     @Autowired
@@ -40,6 +42,9 @@ public class MoYoServiceImpl implements MoYoService {
 
     @Autowired
     LogRepository logRepository;
+
+    @Autowired
+    EntityManager entityManager;
 
     public void connectionsClose(){
 
@@ -108,10 +113,10 @@ public class MoYoServiceImpl implements MoYoService {
                     MoYo.logInfo("MoYoService->deleteMessages", e.getMessage());
                 }
             });
-            messageText = "Ñîîáùåíèÿ óñïåøíî óäàëåíû";
+            messageText = "Ð¡Ð¾Ð¾Ð±Ñ‰ÐµÐ½Ð¸Ñ ÑƒÑÐ¿ÐµÑˆÐ½Ð¾ ÑƒÐ´Ð°Ð»ÐµÐ½Ñ‹";
 
         }catch (Exception ex){
-            messageText = "Ïðîèçîøëà îøèáêà, ñîîáùåíèÿ íå ìîãóò áûòü óäàëåíû";
+            messageText = "ÐŸÑ€Ð¾Ð¸Ð·Ð¾ÑˆÐ»Ð° Ð¾ÑˆÐ¸Ð±ÐºÐ°, ÑÐ¾Ð¾Ð±Ñ‰ÐµÐ½Ð¸Ñ Ð½Ðµ Ð¼Ð¾Ð³ÑƒÑ‚ Ð±Ñ‹Ñ‚ÑŒ ÑƒÐ´Ð°Ð»ÐµÐ½Ñ‹";
             MoYo.logInfo("MoYoService->deleteMessages", ex.getMessage());
         }
         MoYo.showNotification(messageText);
@@ -132,8 +137,14 @@ public class MoYoServiceImpl implements MoYoService {
     }
 
     @Override
+    @Transactional
     public void logClean() {
-        logRepository.deleteAll();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.DATE, -1);
+        Date minus3Day = cal.getTime();
+        entityManager.createNativeQuery("delete from moyo.log where date <= :date").setParameter("date", minus3Day).executeUpdate();
+        //logRepository.deleteAll();
     }
 
     @Override
@@ -227,7 +238,10 @@ public class MoYoServiceImpl implements MoYoService {
 
 
     @Override
+    @Async
     public void controlPoolConnections() {
+
+
 
         String controlPoolConnections = "MoYoService->ControlPoolConnections";
         log(controlPoolConnections,"start...",false);
@@ -322,6 +336,8 @@ public class MoYoServiceImpl implements MoYoService {
         log(controlPoolConnections,"...end", false);
     }
 
+
+
     @Override
     public void updateTubesFail(Database database) {
         if(MoYo.databaseTubesFail.containsKey(database)){
@@ -331,6 +347,30 @@ public class MoYoServiceImpl implements MoYoService {
         else{
             MoYo.databaseTubesFail.put(database, new DatabaseTube(database,1));
         }
+    }
+
+    @Override
+    @Async
+    public void updateNumberUnhandledPackages() {
+        log("updateNumberUnhandledPackages", "start...", false);
+        List<DatabaseUnhandledPackages> numberUnhandledPackagesCopy = new ArrayList<>();
+//        if (MoYoHomeView.isBaseConnected) {
+            MoYo.OdiesComConnectionPool.forEach(
+
+                    (s, odinesComConnection) ->
+                    {
+                        if (odinesComConnection.isConnected()) {
+                            Database database = odinesComConnection.getSettings().getDatabase1C();
+                            Integer nup = odinesComConnection.getNumberUnhandledPackages();
+                            numberUnhandledPackagesCopy.add(new DatabaseUnhandledPackages(database, nup));
+                        }
+                    }
+            );
+//        }
+        numberUnhandledPackages.clear();
+        numberUnhandledPackages.addAll(numberUnhandledPackagesCopy);
+        numberUnhandledPackages.sort(Comparator.comparing(DatabaseUnhandledPackages::getNumberUnhandledMessages).reversed());
+        log("updateNumberUnhandledPackages", "end...", false);
     }
 
     @Override

@@ -32,6 +32,18 @@ public class OdinesComConnector{
         return odinesComConnector;
    }
 
+    public static synchronized OdinesComConnector getConnectorOnline() throws COMException {
+
+        OdinesComConnector odinesComConnector = new OdinesComConnector();
+        DispatchPtr connector1C = new DispatchPtr("V83.COMConnectorOnline");
+        connector1C.put("PoolCapacity", maxConnection);
+        connector1C.put("PoolTimeout",300);
+        connector1C.put("MaxConnections", maxConnection);
+        odinesComConnector.connector = connector1C;
+
+        return odinesComConnector;
+    }
+
     public DispatchPtr invoke(String connectionString) throws COMException{
         return (DispatchPtr) connector.invoke("Connect",connectionString);
     }

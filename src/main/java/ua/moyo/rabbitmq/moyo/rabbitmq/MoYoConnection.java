@@ -10,6 +10,7 @@ import org.jawin.COMException;
 import ua.moyo.rabbitmq.moyo.Service.MoYoService;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -50,8 +51,11 @@ public class MoYoConnection implements Runnable {
             //channel.basicQos(1, false);
             //channel.basicQos(MoYo.connectionPerDatabase, true);
             channel.basicQos(database.getMaxConnection(), true);
-            OdinesComConnector odinesComConnector = OdinesComConnector.getConnector();
 
+//            OdinesComConnector odinesComConnector = database.getIp().equals("10.0.30.28")||database.getIp().equals("10.0.30.33")
+//                    ? OdinesComConnector.getConnectorOnline(): OdinesComConnector.getConnector();
+
+            OdinesComConnector odinesComConnector = OdinesComConnector.getConnector();
 
             for (int i = 1; i <= database.getMaxConnection(); i++) {
                 if (!channel.isOpen()){return;}
@@ -63,7 +67,7 @@ public class MoYoConnection implements Runnable {
                 } catch (Exception e) {
                     e.printStackTrace();
                     MoYo.logInfo("MoYoConnection->run->Exception->Future",
-                            "Íå óäàëîñü ïîäêëþ÷èòüñÿ ê áàçå -"+database.getName()+"- çà çàäàííîå âðåìÿ");
+                            "ÐÐµ ÑƒÐ´Ð°Ð»Ð¾ÑÑŒ Ð¿Ð¾Ð´ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒÑÑ Ðº Ð±Ð°Ð·Ðµ -\"+database.getName()+\"- Ð·Ð° Ð·Ð°Ð´Ð°Ð½Ð½Ð¾Ðµ Ð²Ñ€ÐµÐ¼Ñ");
                     alive = false;
                     channelClose(channel);
                     MoYo.getMoYoService().updateTubesFail(database);
@@ -75,8 +79,14 @@ public class MoYoConnection implements Runnable {
         }
 
         catch(COMException ex){
-            System.out.println(ex.getMessage());
-            MoYo.logInfo("MoYoConnection->run->COMException", ex.getMessage());
+            try {
+                MoYo.logInfo("MoYoConnection->run->COMException", new String(ex.getMessage().getBytes("ISO-8859-1"),"windows-1251"));
+            }
+            catch (UnsupportedEncodingException uee){
+                MoYo.logInfo("MoYoConnection->run->UnsupportedEncodingException", uee.getMessage());
+            }
+
+
         }
 
         catch (IOException ioex){
